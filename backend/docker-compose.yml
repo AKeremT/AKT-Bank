@@ -1,7 +1,9 @@
+name: akt-bank
+
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: core_banking_ledger
+    container_name: akt_bank_postgres
     environment:
       POSTGRES_DB: core_banking_ledger
       POSTGRES_USER: akt
@@ -20,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: banking-app
+    container_name: akt_bank_backend
     ports:
       - "8080:8080"
     environment:
@@ -31,9 +33,19 @@ services:
       postgres:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: akt_bank_frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - app
+
   prometheus:
     image: prom/prometheus:latest
-    container_name: banking_prometheus
+    container_name: akt_bank_prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -43,7 +55,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: banking_grafana
+    container_name: akt_bank_grafana
     ports:
       - "3000:3000"
     environment:
